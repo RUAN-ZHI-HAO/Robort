@@ -1,0 +1,446 @@
+MODULE Module1
+    VAR intnum intstop;
+    VAR intnum intpause;
+    VAR intnum intreset;
+    
+    VAR bool resetFlag := FALSE;
+    VAR bool WorkOrNot := FALSE;
+
+    VAR dionum di5;
+    VAR dionum di6;
+    VAR dionum di7;
+    VAR dionum di8;
+    VAR dionum di9 ;
+    VAR dionum di10 ;
+    VAR dionum di11 ;
+!    VAR dionum di12 ;
+!    VAR dionum di13 ;
+!    VAR dionum di14 ;
+!    VAR dionum di15 ;
+    
+    VAR dionum do8 ;
+    VAR dionum do9 ;
+    VAR dionum do10 ;
+    VAR dionum do11 ;
+    
+    VAR dionum diBuffer{4};
+
+!    VAR dionum stopBuffer{8};
+!    VAR dionum pauseBuffer{8};
+!    VAR dionum recoveryBuffer{8};
+    
+    VAR dionum FatCupBuffer{4};
+    VAR dionum StraightCupBuffer{4};
+    VAR dionum BigDiscCupBuffer{4};
+    VAR dionum SmallDiscCupBuffer{4};
+    
+    VAR clock clock2;
+    VAR num time;
+    
+    CONST jointtarget home:=[[0,0,0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    
+    CONST robtarget Acup_p1:=[[453.85,94.53,146.20],[0.0925856,0.777495,0.58234,0.218655],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget Acup_p2:=[[453.85,114.53,146.20],[0.0925856,0.777495,0.58234,0.218655],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget Acup_p3:=[[451.72,135.15,150.37],[0.0926221,0.777483,0.582352,0.218649],[0,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget Acup_p4:=[[453.85,154.53,146.20],[0.0925856,0.777495,0.58234,0.218655],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget Acup_p5:=[[448.21,179.52,153.93],[0.0925757,0.777512,0.58233,0.218624],[0,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget Acup_p6:=[[453.85,194.53,146.20],[0.0925856,0.777495,0.58234,0.218655],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget Acup_p7:=[[445.84,227.99,157.42],[0.0925067,0.777573,0.582252,0.218644],[0,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    
+    
+!   在每個方格間隔為28mm時，實際要取25mm
+    CONST robtarget dish_p1:=[[376.30,161.04,158.36],[0.503838,-0.85603,0.0995702,0.0586981],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p2:=[[351.32,-21.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p3:=[[402.32,-21.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p4:=[[351.32,-71.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p5:=[[402.32,-71.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p6:=[[326.32,4.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p7:=[[376.32,4.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p8:=[[427.32,4.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p9:=[[326.32,-46.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p10:=[[427.32,-46.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p11:=[[326.32,-96.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p12:=[[376.32,-96.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p13:=[[427.32,-96.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p14:=[[301.32,29.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p15:=[[351.32,29.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p16:=[[402.32,29.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p17:=[[452.32,29.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p18:=[[301.32,-21.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p19:=[[452.32,-21.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p20:=[[301.32,-71.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p21:=[[452.32,-71.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p22:=[[326.32,54.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p23:=[[376.32,54.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p24:=[[427.32,54.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p25:=[[351.32,-121.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p26:=[[402.32,-121.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p27:=[[351.32,54.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p28:=[[402.32,54.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST robtarget dish_p29:=[[376.32,-146.44,154.40],[0.446527,-0.88674,0.113132,0.0388277],[-1,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    
+    CONST robtarget plate_safe:=[[323.79,-24.58,284.11],[0.017565,0.802511,0.596375,-0.00203473],[-1,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    
+    CONST robtarget set_brush:=[[323.79,-24.64,162.39],[0.0176679,0.80251,0.596374,-0.00207136],[-1,-1,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+
+    
+    
+!    VAR dionum finishBuffer{4};
+!    VAR dionum stanbyBuffer{4};
+!    VAR dionum runningBuffer{4};
+    PROC main()
+        CONNECT intstop WITH Trap_stop;
+        CONNECT intpause WITH Trap_pause;
+        CONNECT intreset WITH Trap_reset;
+        ISignalDI ABB_Scalable_IO_0_DI5, 1, intstop;
+        ISignalDI ABB_Scalable_IO_0_DI6, 1, intpause;
+        ISignalDI ABB_Scalable_IO_0_DI7, 1, intreset;
+        
+!        do8 := DOutput(IIO_do1);
+        di5 := DInput(ABB_Scalable_IO_0_DI5);
+        di6 := DInput(ABB_Scalable_IO_0_DI6);
+        di7 := DInput(ABB_Scalable_IO_0_DI7);
+        di8 := DInput(ABB_Scalable_IO_0_DI8);
+        di9 := DInput(ABB_Scalable_IO_0_DI9);
+        di10 := DInput(ABB_Scalable_IO_0_DI10);
+        di11 := DInput(ABB_Scalable_IO_0_DI11);!11
+!        di12 := DInput(ABB_Scalable_IO_0_DI12);
+!        di13 := DInput(ABB_Scalable_IO_0_DI13);
+!        di14 := DInput(ABB_Scalable_IO_0_DI14);
+!        di15 := DInput(ABB_Scalable_IO_0_DI15);
+        
+!        do8 := DOutput(ABB_Scalable_IO_0_DO8);
+!        do9 := DOutput(ABB_Scalable_IO_0_DO9);
+!        do10 := DOutput(ABB_Scalable_IO_0_DO10);
+!        do11 := DOutput(ABB_Scalable_IO_0_DO11);
+        
+!        stopBuffer         := [1, 0, 0, 0, 0, 0, 0, 1];
+!        pauseBuffer        := [1, 0, 0, 0, 0, 0, 0, 1];
+!        recoveryBuffer     := [1, 0, 0, 0, 0, 0, 1, 0];
+        FatCupBuffer       := [1, 0, 0, 1];!1001
+        StraightCupBuffer  := [1, 0, 1, 0];
+        BigDiscCupBuffer   := [1, 0, 1, 1];
+        SmallDiscCupBuffer := [1, 1, 0, 0];
+        
+!        stanbyBuffer       := [0, 0, 0, 0];
+        !Add your code here
+!        IF MatchPattern(diBuffer, stanbyBuffer) THEN
+            WHILE TRUE DO
+!                SetStatusBits 1,1,1,1;
+!                IF resetFlag THEN
+!                    SetStatusBits 1, 0, 0, 0;
+!                    StartMove;
+!                    MoveAbsJ home,v100,z100,Tooldata_1\WObj:=wobj0;
+!                    resetFlag := FALSE;
+!                    TPWrite "reset finish";
+!                ENDIF
+                di8 := DInput(ABB_Scalable_IO_0_DI8);
+                di9 := DInput(ABB_Scalable_IO_0_DI9);
+                di10 := DInput(ABB_Scalable_IO_0_DI10);
+                di11 := DInput(ABB_Scalable_IO_0_DI11);!11
+                diBuffer{1} := di8;
+                diBuffer{2} := di9;
+                diBuffer{3} := di10;
+                diBuffer{4} := di11;
+!                diBuffer{5} := di12;
+!                diBuffer{6} := di13;
+!                diBuffer{7} := di14;
+!                diBuffer{8} := di15;
+                TEST diBuffer
+                CASE FatCupBuffer:
+                    TPWrite "FATCUP";
+                    MoveAbsJ home,v100,z100,Tooldata_1\WObj:=wobj0;
+                    SetStatusBits 0, 0, 1, 0;
+                    WorkOrNot := TRUE;
+                CASE StraightCupBuffer:
+                    SetStatusBits 0, 0, 1, 0; 
+                    MoveAbsJ home,v100,z100,Tooldata_1\WObj:=wobj0;
+                    SetDO ABB_Scalable_IO_0_DO6, 0;
+                    WorkOrNot := TRUE;
+                    ClkReset clock2;
+                    ClkStart clock2;
+                    FOR I FROM 1 TO 5 DO
+                        Path_20;
+                    ENDFOR
+                    ClkStop clock2;
+                    time := ClkRead(clock2);
+                    TPWrite "TIME:"\Num:=time;
+                    MoveAbsJ home,v100,z100,Tooldata_1\WObj:=wobj0;
+                    SetStatusBits 0, 0, 0, 1;
+                CASE BigDiscCupBuffer:
+                    TPWrite "BIGDISK";
+                    MoveAbsJ home,v100,z100,Tooldata_1\WObj:=wobj0;
+                    SetStatusBits 0, 0, 1, 0;
+                    WorkOrNot := TRUE;
+                CASE SmallDiscCupBuffer:
+                    TPWrite "SMALLDISK";
+                    MoveAbsJ home,v100,z100,Tooldata_1\WObj:=wobj0;
+                    SetStatusBits 0, 0, 1, 0;
+                    WorkOrNot := TRUE;
+                DEFAULT:
+                    diBuffer{1} := 0;
+                    diBuffer{2} := 0;
+                    diBuffer{3} := 0;
+                    diBuffer{4} := 0;
+!                    Setdo ABB_Scalable_IO_0_DO16, 1;
+                    ResetAllOutput; 
+!                CASE stopBuffer:
+!                    TPWrite "Emergency stop";
+!                    BREAK;
+!                CASE pauseBuffer:
+!                    TPWrite "Pause, after 3s you can press pause again to keep going";
+!                    WaitTime 3;
+!                    WHILE TRUE DO
+!                        IF (MatchPattern(diBuffer, pauseBuffer) = TRUE) THEN
+!                            TPWrite "lift stop";
+!                            BREAK;
+!                        ENDIF
+!                    ENDWHILE
+!                CASE recoveryBuffer:
+                ENDTEST
+            ENDWHILE
+!        ENDIF
+        
+    ENDPROC 
+    
+!        FUNC bool MatchPattern(dionum diArr{*}, dionum pattern{*})
+!        VAR num i;
+!        FOR i FROM 1 TO Dim(diArr,1) DO
+!            IF diArr{i} <> pattern{i} THEN
+!                RETURN FALSE;
+!            ENDIF
+!        ENDFOR
+!        RETURN TRUE;
+!    ENDFUNC
+    
+    PROC SetStatusBits(dionum b8, dionum b9, dionum b10, dionum b11)
+        SetDO ABB_Scalable_IO_0_DO8, b8;
+        SetDO ABB_Scalable_IO_0_DO9, b9;
+        SetDO ABB_Scalable_IO_0_DO10, b10;
+        SetDO ABB_Scalable_IO_0_DO11, b11;
+    ENDPROC
+    
+    PROC ResetAllOutput()
+        Reset ABB_Scalable_IO_0_DO8;
+        Reset ABB_Scalable_IO_0_DO9;
+        Reset ABB_Scalable_IO_0_DO10;
+        Reset ABB_Scalable_IO_0_DO11;
+    ENDPROC
+    
+    TRAP Trap_stop
+        VAR dionum reset;
+        TPWrite "Emergency stop";
+        SetStatusBits 0, 1, 0, 0;
+        SetDO ABB_Scalable_IO_0_DO5, 0;
+        StopMove;
+        WHILE TRUE DO
+            reset := DInput(ABB_Scalable_IO_0_DI7);
+            IF reset = 1 THEN
+                BREAK;
+            ENDIF
+        ENDWHILE
+        StartMove;
+    ENDTRAP
+    
+    TRAP Trap_pause
+        TPWrite "pause";
+        SetStatusBits 0, 1, 1, 0;
+        StopMove;
+        WHILE TRUE DO
+            di6 := DInput(ABB_Scalable_IO_0_DI6);
+            IF di6 = 0 THEN
+                StartMove;
+                BREAK;
+            ENDIF 
+        IF WorkOrNot THEN
+            ResetAllOutput;
+        ELSE
+            SetStatusBits 0, 0, 1, 0;
+        ENDIF
+        ENDWHILE
+    ENDTRAP
+    
+    TRAP Trap_reset
+        TPWrite "reset";
+        SetStatusBits 1, 0, 0, 0;
+!        storepath;
+        MoveAbsJ home,v100,z100,Tooldata_1\WObj:=wobj0;
+        StopMove;
+        resetFlag := TRUE;
+        TPWrite "reset finish";
+    ENDTRAP
+    
+    PROC get_cup_color()
+        CONST robtarget cup_color_safe:=[[305.07,-283.06,249.06],[0.0175974,0.80247,0.596429,-0.00211987],[-1,-1,-1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+        CONST robtarget cup_color_shave1_up:=[[328.85,-275.50,159.69],[0.0176049,0.802514,0.59637,-0.00207475],[-1,-1,-1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+        CONST robtarget cup_color_shave1_down:=[[328.85,-272.95,124.11],[0.0175994,0.802526,0.596354,-0.00205657],[-1,-1,-1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+        CONST robtarget cup_color_shave1_down_:=[[336.20,-272.98,131.69],[0.137785,-0.787409,-0.589541,0.115946],[-1,-1,-1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+        CONST robtarget cup_color_shave1_down_up:=[[357.04,-272.96,136.57],[0.137785,-0.787412,-0.589537,0.115947],[-1,-1,-1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+        CONST robtarget cup_color_shave2_up:=[[328.85,-275.50,159.69],[0.00245842,0.613943,-0.789151,0.0175836],[-1,-1,-3,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+        CONST robtarget cup_color_shave2_down:=[[328.85,-272.95,124.11],[0.00247795,0.613962,-0.789137,0.0175168],[-1,-1,-3,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+        CONST robtarget cup_color_shave2_down_:=[[336.20,-272.98,131.69],[0.181487,0.595934,-0.774422,-0.110436],[-1,-1,-3,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+        CONST robtarget cup_color_shave2_down_up:=[[357.04,-272.96,136.57],[0.181533,0.595918,-0.774433,-0.110372],[-1,-1,-3,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+        
+        MoveJ cup_color_safe,v400,fine,Tooldata_1\WObj:=wobj0;              !安全點
+        
+        MoveL cup_color_shave1_up,v100,fine,Tooldata_1\WObj:=wobj0;
+!        MoveL offs(cup_color_shave1_down,0,-9,10),v100,fine,Tooldata_1\WObj:=wobj0;
+        MoveL offs(cup_color_shave1_down,0,0,-0.7),v100,fine,Tooldata_1\WObj:=wobj0;
+        WaitTime 1;
+        MoveL cup_color_shave1_down_,v100,fine,Tooldata_1\WObj:=wobj0;
+        MoveL cup_color_shave1_down_up,v20,fine,Tooldata_1\WObj:=wobj0;
+        MoveL cup_color_shave1_up,v100,fine,Tooldata_1\WObj:=wobj0;
+        
+        MoveL cup_color_shave2_up,v100,fine,Tooldata_1\WObj:=wobj0;
+!        MoveL offs(cup_color_shave2_down,0,4,10),v100,fine,Tooldata_1\WObj:=wobj0;
+        MoveL offs(cup_color_shave2_down,0,0,-0.7),v100,fine,Tooldata_1\WObj:=wobj0;
+        WaitTime 1;
+        MoveL cup_color_shave2_down_,v100,fine,Tooldata_1\WObj:=wobj0;
+        MoveL cup_color_shave2_down_up,v20,fine,Tooldata_1\WObj:=wobj0;
+        MoveL cup_color_shave2_up,v100,fine,Tooldata_1\WObj:=wobj0;
+        
+        MoveL cup_color_safe,v400,fine,Tooldata_1\WObj:=wobj0;
+        
+    ENDPROC
+    
+    PROC MotorRotate()
+        SetDO ABB_Scalable_IO_0_DO7, 1;
+        WaitTime 1.5;
+        SetDO ABB_Scalable_IO_0_DO7, 0;
+    ENDPROC
+   
+    PROC Path_10()
+        
+        get_cup_color; 
+        cup Acup_p1,22.2;
+        get_cup_color;
+        cup Acup_p3,23.2;
+        get_cup_color;
+        cup Acup_p5,24.5;
+        get_cup_color;
+        cup Acup_p7,30.5;
+        MotorRotate;
+        
+        get_cup_color;
+        cup Acup_p2,22.2;
+        get_cup_color;
+        cup Acup_p4,23.5;
+        get_cup_color;
+        cup Acup_p6,25.5;
+        
+        MotorRotate;
+    ENDPROC
+
+    PROC cup(robtarget di, num dp)
+        WaitTime 0.2;
+        MoveL offs(di,5,0,5),v300,fine,tooldata_1\wobj:=wobj0; ! 預備動作
+        MoveL offs(di,0,0,0),v100,fine,Tooldata_1\WObj:=wobj0; ! 方格開始位置，可以對 Z 軸做小調整，影響一開始的寬度
+!        WaitTime 0.1;
+        MoveL offs(di,-dp,0,-2),v50,fine,tooldata_1\wobj:=wobj0; ! 方格尾端位置，可以對 Z 軸做小調整，影響一尾端的寬度，Y 軸為長度
+!        turn di;
+        MoveL offs(di,-dp,0,20),v100,fine,tooldata_1\wobj:=wobj0; ! 結束動作，可以針對他的尾巴方向做拉取
+        WaitTime 0.2;
+    ENDPROC
+    
+    PROC dish(robtarget di)
+        WaitTime 0.2;
+        MoveL offs(di,0,5,10),v300,fine,tooldata_1\wobj:=wobj0; ! 預備動作
+        MoveL offs(di,0,0,4),v100,fine,Tooldata_1\WObj:=wobj0; ! 方格開始位置，可以對 Z 軸做小調整，影響一開始的寬度
+!        WaitTime 0.1;
+        MoveL offs(di,0,-23.2,3),v50,fine,tooldata_1\wobj:=wobj0; ! 方格尾端位置，可以對 Z 軸做小調整，影響一尾端的寬度，Y 軸為長度
+!        turn di;
+        MoveL offs(di,0,-23.2,20),v100,fine,tooldata_1\wobj:=wobj0; ! 結束動作，可以針對他的尾巴方向做拉取
+        WaitTime 0.2;
+    ENDPROC
+    
+    PROC turn(robtarget di)
+        VAR jointtarget joints;
+        VAR robtarget target;
+        VAR pose currentPose;
+        VAR pose rotx;
+        VAR pose newpose;
+        VAR robtarget final;
+!        MoveL di,v100,fine,Tooldata_1\WObj:=wobj0;
+        target := CRobT();
+        currentPose.trans := target.trans;
+        currentPose.trans.x := currentPose.trans.x + 10;
+        currentPose.trans.z := currentPose.trans.z + 1;
+        currentPose.rot := target.rot;
+        rotx.trans := [0, 0, 0];
+        rotx.rot := OrientZYX(0, 20, 0);
+        newpose := PoseMult(currentPose, rotx);
+        final.trans := newpose.trans;
+        final.rot := newpose.rot;
+        MoveL final,v50,fine,Tooldata_1\WObj:=wobj0;
+        MoveL offs(final, 5, 0, 10), v100, fine, tooldata_1\wobj := wobj0;
+    ENDPROC
+    
+    PROC Path_20()
+!        MoveL set_brush,v50,fine,Tooldata_1\WObj:=wobj0;
+        
+        get_cup_color;
+        dish dish_p1;
+        get_cup_color;
+        dish dish_p2;
+        get_cup_color;
+        dish dish_p5;
+        get_cup_color;
+        dish dish_p4;
+        get_cup_color;
+        dish dish_p3;
+        get_cup_color;
+        dish dish_p6;
+        get_cup_color;
+        dish dish_p7;
+        get_cup_color;
+        dish dish_p8;
+        get_cup_color;
+        dish dish_p9;
+        get_cup_color;
+        dish dish_p10;
+        get_cup_color;
+        dish dish_p11;
+        get_cup_color;
+        dish dish_p12;
+        get_cup_color;
+        dish dish_p13;
+        get_cup_color;
+        dish dish_p14;
+        get_cup_color;
+        dish dish_p15;
+        get_cup_color;
+        dish dish_p16;
+        get_cup_color;
+        dish dish_p17;
+        get_cup_color;
+        dish dish_p18;
+        get_cup_color;
+        dish dish_p19;
+        get_cup_color;
+        dish dish_p20;
+        get_cup_color;
+        dish dish_p21;
+        get_cup_color;
+        dish dish_p21;
+        get_cup_color;
+        dish dish_p22;
+        get_cup_color;
+        dish dish_p23;
+        get_cup_color;
+        dish dish_p24;
+        get_cup_color;
+        dish dish_p25;
+        get_cup_color;
+        dish dish_p26;
+        get_cup_color;
+        dish dish_p27;
+        get_cup_color;
+        dish dish_p28;
+        get_cup_color;
+        dish dish_p29;
+        MoveL plate_safe,v50,fine,Tooldata_1\WObj:=wobj0;
+        MoveAbsJ home,v100,z100,Tooldata_1\WObj:=wobj0;
+    ENDPROC
+ENDMODULE
+
+    
